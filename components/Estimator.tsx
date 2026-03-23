@@ -94,7 +94,7 @@ export function Estimator() {
   const showHero = step === 1
 
   return (
-    <div style={{ minHeight: '100vh', background: '#2a2e32', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#f0f0ef', position: 'relative', overflow: 'hidden' }}>
 
       {/* ── HERO BACKGROUND ── */}
       <div style={{
@@ -114,7 +114,7 @@ export function Estimator() {
         />
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, transparent 0%, transparent 55%, rgba(20,24,28,0.95) 80%)',
+          background: 'linear-gradient(to bottom, transparent 0%, transparent 100%)',
         }}/>
       </div>
 
