@@ -108,7 +108,7 @@ export function Estimator() {
           alt=""
           style={{
             width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center 60%',
+            objectFit: 'cover', objectPosition: 'center 40%',
             opacity: 1,
           }}
         />
