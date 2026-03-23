@@ -24,8 +24,8 @@ export const estimatorSchema = z.object({
     'painted_poly_flat', 'painted_poly_shaker'
   ]),
 
-  // Step 4: Drawers
-  drawers: z.enum(['none', '1-2', '3-4', '5+']),
+  // Step 4: Drawers (skipped for kitchen_refresh)
+  drawers: z.enum(['none', '1-2', '3-4', '5+']).optional().default('none'),
 
   // Step 5: Installation
   installRequired: z.boolean(),
