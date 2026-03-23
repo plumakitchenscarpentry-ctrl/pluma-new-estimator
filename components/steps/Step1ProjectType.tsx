@@ -110,6 +110,7 @@ export function Step1ProjectType({ value, onChange, onNext }: Props) {
                 padding: '9px 8px 10px',
                 background: isSelected ? 'var(--pluma-dark)' : '#fff',
                 transition: 'background var(--transition)',
+                flex: 1,
               }}>
                 <div style={{
                   fontSize: '0.76rem',
