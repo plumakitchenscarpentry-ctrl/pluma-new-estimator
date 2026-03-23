@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
         consultation: data.consultation,
         leadScore,
         leadTemp,
-      }).catch((e) => console.error('Lead notification email failed:', e)),
+      }).then(() => console.log('Lead notification email sent')).catch((e) => console.error('Lead notification email failed:', e)),
 
       sendCustomerConfirmationEmail({
         name: data.name,
@@ -105,11 +105,11 @@ export async function POST(req: NextRequest) {
         estimateLow: estimate.low,
         estimateHigh: estimate.high,
         consultation: data.consultation,
-      }).catch((e) => console.error('Customer confirmation email failed:', e)),
+      }).then(() => console.log('Customer confirmation email sent')).catch((e) => console.error('Customer confirmation email failed:', e)),
     ]
 
-    // Fire emails but don't await — respond immediately
-    Promise.all(emailPromises)
+    // Await emails so logs appear
+    await Promise.all(emailPromises)
 
     return NextResponse.json({
       success: true,
