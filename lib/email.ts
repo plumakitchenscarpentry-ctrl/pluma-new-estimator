@@ -7,7 +7,9 @@
 import { Resend } from 'resend'
 import { formatCurrency } from './pricing'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY || 'placeholder')
+}
 
 // Use verified domain in prod, fallback to Resend test address for local dev
 const FROM_LEAD   = process.env.RESEND_FROM_ADDRESS || 'Pluma Estimator <onboarding@resend.dev>'
@@ -116,7 +118,7 @@ export async function sendLeadNotificationEmail(data: LeadEmailData): Promise<vo
 </html>
 `
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_LEAD,
     to: process.env.EMAIL_ADDRESS || 'plumakitchenscarpentry@gmail.com',
     subject: `${tempEmoji} New ${data.leadTemp.toUpperCase()} lead — ${data.name} (${data.projectLabel})`,
@@ -181,7 +183,7 @@ export async function sendCustomerConfirmationEmail(data: {
 </html>
 `
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_CUSTOMER,
     to: data.email,
     subject: `Your ${data.projectLabel} estimate — Pluma Joinery Studio`,
