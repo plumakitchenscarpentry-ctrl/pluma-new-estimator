@@ -121,9 +121,9 @@ export function Estimator() {
       {/* ── HEADER ── */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: step === 1 ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.95)',
+        background: step === 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.97)',
         backdropFilter: 'blur(16px)',
-        borderBottom: step === 1 ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
+        borderBottom: step === 1 ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(0,0,0,0.08)',
         transition: 'background 0.3s ease',
       }}>
         <div style={{
@@ -133,7 +133,7 @@ export function Estimator() {
         }}>
           <span style={{
             fontSize: '0.72rem', fontWeight: 600,
-            color: step === 1 ? 'rgba(255,255,255,0.85)' : 'var(--pluma-dark)',
+            color: step === 1 ? 'rgba(255,255,255,0.9)' : 'var(--pluma-dark)',
             letterSpacing: '0.2em', textTransform: 'uppercase',
           }}>
             Pluma Joinery Studio
@@ -224,7 +224,7 @@ function LiveEstimateDisplay({ form }: { form: Partial<EstimatorFormData> }) {
       panelCount: form.panelCount, kickCount: form.kickCount,
     })
     return (
-      <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#fff', letterSpacing: '-0.01em' }}>
+      <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--pluma-dark)', letterSpacing: '-0.01em' }}>
         {formatCurrency(est.low)}–{formatCurrency(est.high)}
       </div>
     )
