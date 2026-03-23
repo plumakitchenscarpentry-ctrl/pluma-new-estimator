@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     // Validate input
     const parsed = estimatorSchema.safeParse(body)
     if (!parsed.success) {
+      console.error('Zod validation failed:', JSON.stringify(parsed.error.flatten()))
       return NextResponse.json(
         { error: 'Invalid form data', details: parsed.error.flatten() },
         { status: 400 }
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest) {
     // Save to database
     let leadId: number
     try {
+      console.log('Attempting DB insert for:', data.name, data.email)
       leadId = await insertLead({
         name: data.name,
         phone: data.phone,
