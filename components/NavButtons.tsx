@@ -33,7 +33,7 @@ export function NavButtons({
           onClick={onBack}
           disabled={loading}
           style={{
-            flex: onBack() ? '0 0 auto' : undefined,
+            flex: '0 0 auto',
             padding: '13px 20px',
             background: 'transparent',
             border: '1px solid var(--pluma-border)',
