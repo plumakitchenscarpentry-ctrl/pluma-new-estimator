@@ -53,8 +53,8 @@ export function NavButtons({
       )}
 
       <button
-        type={isSubmit ? 'submit' : 'button'}
-        onClick={isSubmit ? undefined : onNext}
+        type="button"
+        onClick={onNext}
         disabled={loading || nextDisabled}
         style={{
           flex: 1,
@@ -95,4 +95,3 @@ export function NavButtons({
     </div>
   )
 }
-// fixed
