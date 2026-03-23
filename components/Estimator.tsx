@@ -157,13 +157,14 @@ export function Estimator() {
         {step === 1 && (
           <div style={{ textAlign: 'center', padding: '48px 20px 28px', animation: 'fadeIn 0.6s ease both' }}>
             <img
-              src="/pluma_icon.png"
+              src="/pluma_logo.png"
               alt="Pluma Joinery Studio"
               style={{
-                height: '90px',
+                height: '110px',
                 width: 'auto',
                 margin: '0 auto 16px',
                 display: 'block',
+                mixBlendMode: 'multiply',
               }}
             />
             <h1 style={{
