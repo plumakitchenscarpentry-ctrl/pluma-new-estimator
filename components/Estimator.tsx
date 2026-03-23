@@ -114,7 +114,7 @@ export function Estimator() {
         />
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(200,210,215,0.2) 30%, rgba(20,24,28,0.92) 75%)',
+          background: 'linear-gradient(to bottom, transparent 0%, transparent 55%, rgba(20,24,28,0.95) 80%)',
         }}/>
       </div>
 
