@@ -108,13 +108,13 @@ export function Estimator() {
           alt=""
           style={{
             width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center 45%',
+            objectFit: 'cover', objectPosition: 'center 60%',
             opacity: 1,
           }}
         />
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.1) 30%, rgba(20,24,28,0.95) 75%)',
+          background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(200,210,215,0.2) 30%, rgba(20,24,28,0.92) 75%)',
         }}/>
       </div>
 
