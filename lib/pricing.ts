@@ -229,10 +229,6 @@ function roundTo500(value: number): number {
   return Math.max(500, Math.round(value / 500) * 500)
 }
 
-function roundTo500(value: number): number {
-  return Math.round(value / 500) * 500
-}
-
 function buildEstimate(cost: number): { low: number; high: number } {
   const final = cost * (1 + ADMIN_PERCENT)
   return {
