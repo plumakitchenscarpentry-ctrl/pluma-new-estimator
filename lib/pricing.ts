@@ -166,8 +166,11 @@ const INSTALL_DAY_COST = 1400
 const SMALL_JOB_INSTALL_COST = 400
 const ADMIN_PERCENT = 0.10
 
-function transportCost(boxes: number): number {
-  return boxes >= 2 ? 300 : 0
+function transportCost(projectType: ProjectType, widthMm: number, installRequired: boolean): number {
+  if (!installRequired) return 0  // no transport for supply-only
+  if (projectType === 'kitchen' || projectType === 'wardrobe') return 300  // always for big projects
+  if (widthMm > 1000) return 300  // large custom jobs
+  return 0  // small jobs no transport
 }
 
 const INSTALL_DAYS: Record<ProjectType, number> = {
@@ -281,11 +284,12 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
     const panels = (input.panelCount ?? 0) * LARGE_PANEL_COST
     const kicks = (input.kickCount ?? 0) * KICK_RAIL_COST
     const install = installCost('kitchen_refresh', input.installRequired, 2)
-    const total = doors + drawers + panels + kicks + install + 300
+    const transport = input.installRequired ? 300 : 0
+    const total = doors + drawers + panels + kicks + install + transport
     const result = buildEstimate(total)
     low = result.low
     high = result.high
-    breakdown = { carcass: 0, doorCount: (input.doorCount ?? 0) + (input.drawerFrontCount ?? 0), doorCost: doors, drawerCost: drawers, panelCost: panels, kickCost: kicks, installCost: install, transport: 300, total }
+    breakdown = { carcass: 0, doorCount: (input.doorCount ?? 0) + (input.drawerFrontCount ?? 0), doorCost: doors, drawerCost: drawers, panelCost: panels, kickCost: kicks, installCost: install, transport, total }
   } else {
     // estimate_project()
     const w = input.widthMm ?? 2400
@@ -296,7 +300,7 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
     const doors = doorsCost(w, h, input.finishType)
     const drawers = drawerCost(input.drawers)
     const install = installCost(input.projectType, input.installRequired, boxes)
-    const transport = transportCost(boxes)
+    const transport = transportCost(input.projectType, w, input.installRequired)
     const total = carcass + doors + drawers + install + transport
     const result = buildEstimate(total)
     low = result.low
