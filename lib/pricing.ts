@@ -131,11 +131,6 @@ export const FINISH_PRICES: Record<FinishType, { label: string; pricePerDoor: nu
   },
 }
 
-// ---------- MATERIAL COSTS (exact match to pricing_engine.py) ----------
-const SHEET_AREA = 2.88       // sqm per sheet
-const SHEET_COST = 45         // $ per sheet
-const PANEL_CUT_COST = 60     // $ per panel cut
-
 // ---------- MATERIAL COSTS ----------
 const SHEET_COST = 65         // $ per MDF sheet (2400x1200)
 const SHEET_CUT_COST = 100    // $ per sheet cut fee
