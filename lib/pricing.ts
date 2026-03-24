@@ -133,8 +133,24 @@ export const FINISH_PRICES: Record<FinishType, { label: string; pricePerDoor: nu
 
 // ---------- MATERIAL COSTS (exact match to pricing_engine.py) ----------
 const SHEET_AREA = 2.88       // sqm per sheet
-const SHEET_COST = 60         // $ per sheet
-const PANEL_CUT_COST = 100    // $ per panel cut
+const SHEET_COST = 45         // $ per sheet
+const PANEL_CUT_COST = 60     // $ per panel cut
+
+// ---------- MATERIAL COSTS ----------
+const SHEET_COST = 65         // $ per MDF sheet (2400x1200)
+const SHEET_CUT_COST = 100    // $ per sheet cut fee
+const SHEET_COST_TOTAL = SHEET_COST + SHEET_CUT_COST  // $165 per sheet
+const SHEET_AREA = 2.88       // sqm per sheet (2.4 x 1.2)
+const WASTE_FACTOR = 1.25     // 25% waste allowance
+
+// Door/face costs per sqm (includes cut, finish, hinges, 30% install margin)
+const DOOR_SQM_PRICES: Record<FinishType, number> = {
+  laminate_affordable: 180,   // per door
+  laminate_medium:     220,
+  laminate_premium:    300,
+  painted_poly_flat:   200,   // per sqm cut+paint
+  painted_poly_shaker: 280,
+}
 
 const DOOR_PRICES: Record<FinishType, number> = {
   laminate_affordable: 180,
@@ -144,15 +160,20 @@ const DOOR_PRICES: Record<FinishType, number> = {
   painted_poly_shaker: 330,
 }
 
-const STANDARD_DOOR_WIDTH_MM = 400
-const DRAWER_COST_EACH = 220   // same price as a standard door front
+const STANDARD_DOOR_WIDTH_MM = 500
+const STANDARD_DOOR_HEIGHT_MM = 700  // average door height for sqm calc
+const DRAWER_COST_EACH = 150
 
 const LARGE_PANEL_COST = 470
 const KICK_RAIL_COST = 150
 
 const INSTALL_DAY_COST = 1400
-const TRANSPORT_COST = 300
+const SMALL_JOB_INSTALL_COST = 400
 const ADMIN_PERCENT = 0.10
+
+function transportCost(boxes: number): number {
+  return boxes >= 2 ? 300 : 0
+}
 
 const INSTALL_DAYS: Record<ProjectType, number> = {
   wardrobe:        2.5,
@@ -165,29 +186,36 @@ const INSTALL_DAYS: Record<ProjectType, number> = {
 
 // ---------- HELPERS ----------
 function calculateBoxes(widthMm: number): number {
-  return Math.ceil(widthMm / 500)
+  return Math.max(1, Math.ceil(widthMm / 600))
 }
 
 function carcassCost(widthMm: number, heightMm: number, depthMm: number): number {
   const boxes = calculateBoxes(widthMm)
-  const totalPanels = boxes * 5
   const boxWidthM = (widthMm / boxes) / 1000
   const heightM = heightMm / 1000
   const depthM = depthMm / 1000
+  // Each box: 2 sides + top + bottom + back = 5 panels
   const areaPerBox = (heightM * depthM * 2) + (boxWidthM * depthM * 2) + (boxWidthM * heightM)
-  const totalArea = areaPerBox * boxes
+  const totalArea = areaPerBox * boxes * WASTE_FACTOR
   const sheetsNeeded = Math.ceil(totalArea / SHEET_AREA)
-  return (sheetsNeeded * SHEET_COST) + (totalPanels * PANEL_CUT_COST)
+  return sheetsNeeded * SHEET_COST_TOTAL
 }
 
 function countDoors(widthMm: number): number {
   return Math.ceil(widthMm / STANDARD_DOOR_WIDTH_MM)
 }
 
-function doorsCost(widthMm: number, finishType: FinishType): number {
+function doorsCost(widthMm: number, heightMm: number, finishType: FinishType): number {
   const numDoors = countDoors(widthMm)
-  const unitPrice = DOOR_PRICES[finishType] ?? 220
-  return numDoors * unitPrice
+  if (finishType === 'painted_poly_flat' || finishType === 'painted_poly_shaker') {
+    // Painted poly: priced per sqm
+    const doorWidthM = (widthMm / numDoors) / 1000
+    const doorHeightM = Math.min(heightMm, 2400) / 1000
+    const sqmPerDoor = doorWidthM * doorHeightM
+    return numDoors * sqmPerDoor * DOOR_SQM_PRICES[finishType]
+  }
+  // Laminate: flat price per door
+  return numDoors * DOOR_PRICES[finishType]
 }
 
 function drawerCost(drawerBand: DrawerOption): number {
@@ -195,10 +223,15 @@ function drawerCost(drawerBand: DrawerOption): number {
   return (bands[drawerBand] ?? 0) * DRAWER_COST_EACH
 }
 
-function installCost(projectType: ProjectType, installRequired: boolean): number {
+function installCost(projectType: ProjectType, installRequired: boolean, boxes: number): number {
   if (!installRequired) return 0
+  if (boxes <= 1) return SMALL_JOB_INSTALL_COST
   const days = INSTALL_DAYS[projectType] ?? 1.0
   return days * INSTALL_DAY_COST
+}
+
+function roundTo500(value: number): number {
+  return Math.max(500, Math.round(value / 500) * 500)
 }
 
 function roundTo500(value: number): number {
@@ -256,26 +289,28 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
     const drawers = (input.drawerFrontCount ?? 0) * unitPrice  // same price as doors
     const panels = (input.panelCount ?? 0) * LARGE_PANEL_COST
     const kicks = (input.kickCount ?? 0) * KICK_RAIL_COST
-    const install = installCost('kitchen_refresh', input.installRequired)
-    const total = doors + drawers + panels + kicks + install + TRANSPORT_COST
+    const install = installCost('kitchen_refresh', input.installRequired, 2)
+    const total = doors + drawers + panels + kicks + install + 300
     const result = buildEstimate(total)
     low = result.low
     high = result.high
-    breakdown = { carcass: 0, doorCount: (input.doorCount ?? 0) + (input.drawerFrontCount ?? 0), doorCost: doors, drawerCost: drawers, panelCost: panels, kickCost: kicks, installCost: install, transport: TRANSPORT_COST, total }
+    breakdown = { carcass: 0, doorCount: (input.doorCount ?? 0) + (input.drawerFrontCount ?? 0), doorCost: doors, drawerCost: drawers, panelCost: panels, kickCost: kicks, installCost: install, transport: 300, total }
   } else {
     // estimate_project()
     const w = input.widthMm ?? 2400
     const h = input.heightMm ?? 2400
     const d = input.depthMm ?? 550
+    const boxes = Math.max(1, Math.ceil(w / 600))
     const carcass = carcassCost(w, h, d)
-    const doors = doorsCost(w, input.finishType)
+    const doors = doorsCost(w, h, input.finishType)
     const drawers = drawerCost(input.drawers)
-    const install = installCost(input.projectType, input.installRequired)
-    const total = carcass + doors + drawers + install + TRANSPORT_COST
+    const install = installCost(input.projectType, input.installRequired, boxes)
+    const transport = transportCost(boxes)
+    const total = carcass + doors + drawers + install + transport
     const result = buildEstimate(total)
     low = result.low
     high = result.high
-    breakdown = { carcass, doorCount: countDoors(w), doorCost: doors, drawerCost: drawers, panelCost: 0, kickCost: 0, installCost: install, transport: TRANSPORT_COST, total }
+    breakdown = { carcass, doorCount: countDoors(w), doorCost: doors, drawerCost: drawers, panelCost: 0, kickCost: 0, installCost: install, transport, total }
   }
 
   return { low, high, breakdown }
