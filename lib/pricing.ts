@@ -134,18 +134,10 @@ export const FINISH_PRICES: Record<FinishType, { label: string; pricePerDoor: nu
 // ---------- MATERIAL COSTS ----------
 const SHEET_COST = 65         // $ per MDF sheet (2400x1200)
 const SHEET_CUT_COST = 100    // $ per sheet cut fee
-const SHEET_COST_TOTAL = SHEET_COST + SHEET_CUT_COST  // $165 per sheet
+const SHEET_EDGING_COST = 100 // $ per sheet edging
+const SHEET_COST_TOTAL = SHEET_COST + SHEET_CUT_COST + SHEET_EDGING_COST  // $265 per sheet
 const SHEET_AREA = 2.88       // sqm per sheet (2.4 x 1.2)
 const WASTE_FACTOR = 1.25     // 25% waste allowance
-
-// Door/face costs per sqm (includes cut, finish, hinges, 30% install margin)
-const DOOR_SQM_PRICES: Record<FinishType, number> = {
-  laminate_affordable: 180,   // per door
-  laminate_medium:     220,
-  laminate_premium:    300,
-  painted_poly_flat:   200,   // per sqm cut+paint
-  painted_poly_shaker: 280,
-}
 
 // Door prices WITH installation (includes hinges, handles prep, fitting)
 const DOOR_PRICES: Record<FinishType, number> = {
@@ -162,14 +154,14 @@ const DOOR_PRICES_SUPPLY_ONLY: Record<FinishType, number> = {
   laminate_medium:     180,
   laminate_premium:    260,
   painted_poly_flat:   150,
-  painted_poly_shaker: 220,
+  painted_poly_shaker: 310,
 }
 
 const DRAWER_PRICE_INSTALL = 150   // with installation
 const DRAWER_PRICE_SUPPLY  = 140   // supply only
 
-const STANDARD_DOOR_WIDTH_MM = 500
-const STANDARD_DOOR_HEIGHT_MM = 700
+const STANDARD_DOOR_WIDTH_MM = 300   // standard door width
+const STANDARD_DOOR_HEIGHT_MM = 700  // standard door height
 const DRAWER_COST_EACH = 150  // kept for wardrobe/cabinet drawer boxes
 
 const LARGE_PANEL_COST = 470
@@ -186,13 +178,21 @@ function transportCost(projectType: ProjectType, widthMm: number, installRequire
   return 0  // small jobs no transport
 }
 
-const INSTALL_DAYS: Record<ProjectType, number> = {
-  wardrobe:        2.5,
-  kitchen:         4.0,
-  kitchen_refresh: 1.5,
-  tv_unit:         1.5,
+// Complexity multiplier — accounts for internal fittings, cutouts, scribing etc
+const COMPLEXITY: Record<ProjectType, number> = {
+  wardrobe:        1.0,
+  kitchen:         1.6,
+  kitchen_refresh: 1.0,
+  tv_unit:         1.3,
   bench_seat:      1.0,
   custom_cabinet:  1.0,
+}
+  wardrobe:        0.8,
+  kitchen:         4.0,
+  kitchen_refresh: 1.5,
+  tv_unit:         1.0,
+  bench_seat:      0.5,
+  custom_cabinet:  0.5,
 }
 
 // ---------- HELPERS ----------
@@ -216,17 +216,10 @@ function countDoors(widthMm: number): number {
   return Math.ceil(widthMm / STANDARD_DOOR_WIDTH_MM)
 }
 
-function doorsCost(widthMm: number, heightMm: number, finishType: FinishType): number {
+function doorsCost(widthMm: number, heightMm: number, finishType: FinishType, installRequired: boolean = true): number {
   const numDoors = countDoors(widthMm)
-  if (finishType === 'painted_poly_flat' || finishType === 'painted_poly_shaker') {
-    // Painted poly: priced per sqm
-    const doorWidthM = (widthMm / numDoors) / 1000
-    const doorHeightM = Math.min(heightMm, 2400) / 1000
-    const sqmPerDoor = doorWidthM * doorHeightM
-    return numDoors * sqmPerDoor * DOOR_SQM_PRICES[finishType]
-  }
-  // Laminate: flat price per door
-  return numDoors * DOOR_PRICES[finishType]
+  const prices = installRequired ? DOOR_PRICES : DOOR_PRICES_SUPPLY_ONLY
+  return numDoors * prices[finishType]
 }
 
 function drawerCost(drawerBand: DrawerOption): number {
@@ -311,8 +304,8 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
     const h = input.heightMm ?? 2400
     const d = input.depthMm ?? 550
     const boxes = Math.max(1, Math.ceil(w / 600))
-    const carcass = carcassCost(w, h, d)
-    const doors = doorsCost(w, h, input.finishType)
+    const carcass = carcassCost(w, h, d) * COMPLEXITY[input.projectType]
+    const doors = doorsCost(w, h, input.finishType, input.installRequired)
     const drawers = drawerCost(input.drawers)
     const install = installCost(input.projectType, input.installRequired, boxes)
     const transport = transportCost(input.projectType, w, input.installRequired)
