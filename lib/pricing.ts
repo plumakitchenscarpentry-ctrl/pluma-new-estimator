@@ -147,6 +147,7 @@ const DOOR_SQM_PRICES: Record<FinishType, number> = {
   painted_poly_shaker: 280,
 }
 
+// Door prices WITH installation (includes hinges, handles prep, fitting)
 const DOOR_PRICES: Record<FinishType, number> = {
   laminate_affordable: 180,
   laminate_medium:     220,
@@ -155,9 +156,21 @@ const DOOR_PRICES: Record<FinishType, number> = {
   painted_poly_shaker: 330,
 }
 
+// Door prices supply only (no installation)
+const DOOR_PRICES_SUPPLY_ONLY: Record<FinishType, number> = {
+  laminate_affordable: 150,
+  laminate_medium:     180,
+  laminate_premium:    260,
+  painted_poly_flat:   150,
+  painted_poly_shaker: 220,
+}
+
+const DRAWER_PRICE_INSTALL = 150   // with installation
+const DRAWER_PRICE_SUPPLY  = 140   // supply only
+
 const STANDARD_DOOR_WIDTH_MM = 500
-const STANDARD_DOOR_HEIGHT_MM = 700  // average door height for sqm calc
-const DRAWER_COST_EACH = 150
+const STANDARD_DOOR_HEIGHT_MM = 700
+const DRAWER_COST_EACH = 150  // kept for wardrobe/cabinet drawer boxes
 
 const LARGE_PANEL_COST = 470
 const KICK_RAIL_COST = 150
@@ -277,10 +290,12 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
   let breakdown: EstimateResult['breakdown']
 
   if (input.projectType === 'kitchen_refresh') {
-    // estimate_kitchen_reface()
-    const unitPrice = DOOR_PRICES[input.finishType] ?? 220
-    const doors = (input.doorCount ?? 0) * unitPrice
-    const drawers = (input.drawerFrontCount ?? 0) * unitPrice  // same price as doors
+    const doorPrice = input.installRequired
+      ? (DOOR_PRICES[input.finishType] ?? 220)
+      : (DOOR_PRICES_SUPPLY_ONLY[input.finishType] ?? 150)
+    const drawerPrice = input.installRequired ? DRAWER_PRICE_INSTALL : DRAWER_PRICE_SUPPLY
+    const doors = (input.doorCount ?? 0) * doorPrice
+    const drawers = (input.drawerFrontCount ?? 0) * drawerPrice
     const panels = (input.panelCount ?? 0) * LARGE_PANEL_COST
     const kicks = (input.kickCount ?? 0) * KICK_RAIL_COST
     const install = installCost('kitchen_refresh', input.installRequired, 2)
