@@ -139,7 +139,7 @@ export function Estimator() {
             Pluma Joinery Studio
           </span>
 
-          {step >= 3 && step < 8 && (
+          {false && step >= 3 && step < 8 && (
             <div style={{ position: 'absolute', right: '20px', textAlign: 'right' }}>
               <div style={{ fontSize: '0.62rem', color: 'var(--pluma-light)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '1px' }}>
                 Guide estimate
