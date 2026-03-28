@@ -98,16 +98,18 @@ export function Step3Finish({ value, onChange, onNext, onBack, isRefresh }: Prop
                 </div>
               </div>
 
-              {/* Price */}
-              <div style={{
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                color: isSelected ? 'rgba(255,255,255,0.85)' : 'var(--pluma-mid)',
-                flexShrink: 0,
-                transition: 'color var(--transition)',
-              }}>
-                ${config.pricePerDoor}/door
-              </div>
+              {/* Price — only for kitchen refresh */}
+              {isRefresh && (
+                <div style={{
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  color: isSelected ? 'rgba(255,255,255,0.85)' : 'var(--pluma-mid)',
+                  flexShrink: 0,
+                  transition: 'color var(--transition)',
+                }}>
+                  ${config.pricePerDoor}/door
+                </div>
+              )}
             </button>
           )
         })}
