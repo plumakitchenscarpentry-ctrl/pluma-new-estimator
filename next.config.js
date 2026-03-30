@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // pg uses native Node.js modules — keep it server-side only
   serverExternalPackages: ['pg', 'pg-native'],
-  // Ensure env vars are available server-side only (not leaked to client)
   env: {},
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'header', key: 'x-forwarded-proto', value: 'http' }],
+        destination: 'https://www.plumajoinery.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
 }
-
 module.exports = nextConfig
